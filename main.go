@@ -120,6 +120,24 @@ func main() {
 
 		c.JSON(http.StatusOK, gin.H{"message": "Team deleted"})
 	})
+	r.GET("/get_users", func(c *gin.Context) {
+		var users []User
+		if err := db.Find(&users).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		var userList []map[string]interface{}
+		for _, user := range users {
+			userList = append(userList, map[string]interface{}{
+				"login":    user.Login,
+				"password": user.Password,
+				"isAdmin":  user.IsAdmin,
+			})
+		}
+
+		c.JSON(http.StatusOK, userList)
+	})
 	r.POST("/add_user", func(c *gin.Context) {
 		var user User
 		if err := c.ShouldBindJSON(&user); err != nil {
